@@ -14,10 +14,16 @@ func GetPublicIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "", err
+	}
+
+	// Need to trim newline
+	if b[len(b)-1] == byte('\n') {
+		b = b[:len(b)-1]
 	}
 
 	return string(b), nil
