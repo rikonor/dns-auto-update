@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	"log"
 	"time"
 
 	"github.com/rikonor/dns-auto-update/dnsproviders"
@@ -9,25 +10,42 @@ import (
 )
 
 func main() {
-	p := dnsproviders.NewGoDaddy()
+	var (
+		domainName   = flag.String("d", "", "Domain name to track")
+		providerName = flag.String("p", "godaddy", "DNS Provider to use")
+	)
+	flag.Parse()
+
+	if *domainName == "" {
+		log.Fatalln("Please provide a domain name")
+	}
+	if *providerName != "godaddy" {
+		log.Fatalln("Only GoDaddy is supported at the moment")
+	}
+
+	p := dnsproviders.NewGoDaddy(*domainName)
 
 	for {
+		time.Sleep(5 * time.Minute)
+
 		publicIP, err := publicip.GetPublicIP()
 		if err != nil {
-			fmt.Println("Failed to get public IP:", err)
+			log.Println("Failed to get public IP:", err)
 			continue
 		}
 
 		dnsIP, err := p.GetCurrentDNSIP()
 		if err != nil {
-			fmt.Println("Failed to get DNS IP:", err)
+			log.Println("Failed to get DNS IP:", err)
 			continue
 		}
 
 		if publicIP != dnsIP {
-			p.SetCurrentDNSIP(publicIP)
+			err = p.SetCurrentDNSIP(publicIP)
+			if err != nil {
+				log.Println("Failed to update DNS IP:", err)
+				continue
+			}
 		}
-
-		time.Sleep(1 * time.Minute)
 	}
 }

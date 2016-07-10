@@ -9,6 +9,7 @@ const (
 	publicIPEndPoint = "http://ifconfig.co"
 )
 
+// GetPublicIP gets the running host's public ip from the ifconfig.co public service
 func GetPublicIP() (string, error) {
 	res, err := http.Get(publicIPEndPoint)
 	if err != nil {
