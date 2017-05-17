@@ -1,4 +1,4 @@
-FROM scratch
+FROM rikonor/scratch
 
 WORKDIR /app
 COPY dns-auto-update /app
